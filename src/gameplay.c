@@ -4,6 +4,7 @@
 #include "raylib.h"
 #include "scaling.h"
 #include <stdlib.h>
+#include <math.h>
 
 
 
@@ -17,6 +18,7 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
     float lane_width = size * 2 + gap;
     float total_width = lane_width * chart->lanes - gap;
     float guide_thickness = 1.05; // guide circles line thickness
+    float hit_threshold = 50.0;
 
     ClearBackground(BLACK);
 
@@ -31,6 +33,22 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
     }
 
     float time = GetMusicTimePlayed(chart->song) * 1000;
+
+    for(int i = 0; i < chart->lanes; i++) {
+        if(IsKeyPressed(controls->binds[chart->lanes].lane_keys[i])) {
+            int j = gp_state->note_index;
+            while(j < chart->note_count) {
+                if(chart->notes[j].lane == i) {
+                    break;
+                }
+                j++;
+            }
+            if(fabsf(chart->notes[j].time_ms - time) < hit_threshold) {
+                        chart->notes[j].hit = true;
+            }
+        }
+    }
+
     int i = gp_state->note_index;
     while(true) {
 
@@ -51,7 +69,11 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
             i++;
             continue;
         }
-        
+
+        if(chart->notes[i].hit == true) {
+            i++;
+            continue;
+        }
 
         DrawCircle(x, position * scale, size * scale, WHITE);
         i++;
