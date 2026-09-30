@@ -1,5 +1,5 @@
 PLATFORM ?= linux
-BACKEND  ?= wayland
+BACKEND  ?= x11
 
 ifeq ($(PLATFORM),windows)
 
@@ -8,8 +8,8 @@ ifeq ($(PLATFORM),windows)
     RAYLIB  = lib/windows/libraylib.a
     INCLUDE = -Ilib/windows/include
 
-    CFLAGS  = -Wall -std=c99 -g $(INCLUDE)
-    LDFLAGS = $(RAYLIB) -lopengl32 -lgdi32 -lwinmm -static -static-libgcc
+    CFLAGS  = -Wall -std=c99 -g -flto $(INCLUDE)
+    LDFLAGS = $(RAYLIB) -lopengl32 -lgdi32 -lwinmm -static -static-libgcc -flto
 
     OBJDIR  = obj/windows
 
@@ -20,13 +20,13 @@ else
     INCLUDE = -Ilib/linux/$(BACKEND)
     RAYLIB  = lib/linux/$(BACKEND)/libraylib.a
 
-    CFLAGS  = -Wall -std=c99 -g -O3 $(INCLUDE)
+    CFLAGS  = -Wall -std=c99 -g -O3 -flto $(INCLUDE)
 
     ifeq ($(BACKEND),wayland)
-        LDFLAGS = $(RAYLIB) -lGL -lwayland-client -lwayland-cursor -lxkbcommon -lm -lpthread -ldl -lrt
+        LDFLAGS = $(RAYLIB) -lGL -lwayland-client -lwayland-cursor -lxkbcommon -lm -lpthread -ldl -lrt -flto
         OBJDIR  = obj/linux/wayland
     else ifeq ($(BACKEND),x11)
-        LDFLAGS = $(RAYLIB) -lGL -lX11 -lm -lpthread -ldl -lrt
+        LDFLAGS = $(RAYLIB) -lGL -lX11 -lm -lpthread -ldl -lrt -flto
         OBJDIR  = obj/linux/x11
     else
         $(error Unknown backend '$(BACKEND)')
