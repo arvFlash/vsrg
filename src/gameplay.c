@@ -18,7 +18,7 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
     float lane_width = size * 2 + gap;
     float total_width = lane_width * chart->lanes - gap;
     float guide_thickness = 1.05; // guide circles line thickness
-    float hit_threshold = 50.0;
+    float hit_threshold = 300.0; // max timing error in ms
 
     ClearBackground(BLACK);
 
@@ -35,6 +35,14 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
     float time = GetMusicTimePlayed(chart->song) * 1000;
 
     for(int i = 0; i < chart->lanes; i++) {
+        if(gp_state->held_note_index[i] != -1) {
+            if(!IsKeyDown(controls->binds[chart->lanes].lane_keys[i])) {
+                chart->notes[gp_state->held_note_index[i]].state = NOTE_DONE;
+            }
+        }
+    }
+
+    for(int i = 0; i < chart->lanes; i++) {
         if(IsKeyPressed(controls->binds[chart->lanes].lane_keys[i])) {
             int j = gp_state->note_index;
             while(j < chart->note_count) {
@@ -44,14 +52,19 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
                 j++;
             }
             if(fabsf(chart->notes[j].time_ms - time) < hit_threshold) {
-                        chart->notes[j].hit = true;
+                if(chart->notes[j].end_time_ms > chart->notes[j].time_ms) {
+                    chart->notes[j].state = NOTE_HOLDING;
+                    gp_state->held_note_index[chart->notes[j].lane] = j;
+                } else {
+                    chart->notes[j].state = NOTE_DONE;
+                }      
             }
         }
     }
 
     int i = gp_state->note_index;
     while(true) {
-
+        bool is_ln = chart->notes[i].end_time_ms > chart->notes[i].time_ms;
 
         if(i >= chart->note_count) {
             break;
@@ -59,23 +72,36 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
 
         float position = ((chart->notes[i].time_ms - time) * speed) * -1 + 1080 - hit_pos;
         float x = center_circ() - total_width * scale * 0.5f + (chart->notes[i].lane * lane_width * scale) + (size * scale);
+        float ln_position = position;
+        if(is_ln) {
+            ln_position = ((chart->notes[i].end_time_ms - time) * speed) * -1 + 1080 - hit_pos;
+        }
+
 
         if(position < -size) {
             break;
         }
 
-        if(position > 1080 + size) {
+        if(ln_position > 1080 + size) {
             gp_state->note_index++;
             i++;
             continue;
         }
 
-        if(chart->notes[i].hit == true) {
+        if(chart->notes[i].state == NOTE_DONE) {
             i++;
             continue;
         }
 
+        if(chart->notes[i].state == NOTE_HOLDING) {
+            position = 1080 - hit_pos;
+        }
+
         DrawCircle(x, position * scale, size * scale, WHITE);
+        if(is_ln) {
+            DrawCircle(x, ln_position * scale, size * scale, WHITE);
+            DrawRectangle(x - size * scale, ln_position * scale, size * scale * 2, (position - ln_position) * scale, WHITE);
+        }
         i++;
     }
 

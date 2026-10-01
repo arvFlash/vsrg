@@ -1,13 +1,15 @@
-#include <stdint.h>
-#include "raylib.h"
 #ifndef STRUCTS_H
 #define STRUCTS_H
+
+#include <stdint.h>
+#include "raylib.h"
+#include "enums.h"
 
 typedef struct {
     uint32_t time_ms;
     uint32_t end_time_ms;
     uint8_t lane;
-    bool hit;
+    NoteState state;
 } Note;
 
 typedef struct {
@@ -19,6 +21,7 @@ typedef struct {
 
 typedef struct {
     uint32_t note_index;
+    int held_note_index[10];
 } GameplayState;
 
 typedef struct {
@@ -28,5 +31,11 @@ typedef struct {
 typedef struct {
     KeyBinds binds[11];
 } Controls;
+
+typedef struct {
+    JudgementOutcome outcome;
+    float click_delay_ms;
+    float release_delay_ms;
+} JudgementResult;
 
 #endif

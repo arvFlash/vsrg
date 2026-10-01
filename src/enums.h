@@ -9,4 +9,16 @@ typedef enum {
     STATE_RESULTS
 } GameState;
 
+typedef enum {
+    NOTE_PENDING,
+    NOTE_HOLDING,
+    NOTE_DONE
+} NoteState;
+
+typedef enum {
+    JUDGEMENT_PENDING,
+    JUDGEMENT_HIT,
+    JUDGEMENT_DROPPED
+} JudgementOutcome;
+
 #endif

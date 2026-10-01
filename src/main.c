@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(800, 450, "vsrg");
-    SetTargetFPS(0);
+    SetTargetFPS(720);
     InitAudioDevice();
     SetMasterVolume(1.0);
 
