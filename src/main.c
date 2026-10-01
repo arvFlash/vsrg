@@ -29,12 +29,6 @@ int main(int argc, char *argv[])
         BeginDrawing();
         DrawFPS(0, 0);
 
-        // DrawRectangleRec((Rectangle){left(250 * scale), 490 * scale, 100 * scale, 100 * scale}, RED);
-        // DrawRectangleRec((Rectangle){right(250 * scale, 100 * scale), 490 * scale, 100 * scale, 100 * scale}, BLUE);
-        // DrawRectangleRec((Rectangle){center(100 * scale), 490 * scale, 100 * scale, 100 * scale}, PURPLE);
-        // DrawRectangleRec((Rectangle){center(100 * scale) + 100 * scale, 490 * scale, 100 * scale, 100 * scale}, ORANGE);
-        // DrawRectangleRec((Rectangle){center(100 * scale) - 100 * scale, 490 * scale, 100 * scale, 100 * scale}, ORANGE);
-        
         switch(state) {
             case STATE_MENU:
                 StartMenu(&state, &chart, &gp_state);
