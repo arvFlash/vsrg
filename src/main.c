@@ -24,6 +24,7 @@ int main(int argc, char *argv[])
     GameState state = STATE_MENU;
     Chart chart;
     GameplayState gp_state;
+    JudgementResult judgement_result;
     
     while(!WindowShouldClose()) {
         BeginDrawing();

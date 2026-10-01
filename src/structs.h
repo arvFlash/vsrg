@@ -20,8 +20,16 @@ typedef struct {
 } Chart;
 
 typedef struct {
+    JudgementOutcome outcome;
+    float click_delay_ms;
+    float release_delay_ms;
+} JudgementResult;
+
+
+typedef struct {
     uint32_t note_index;
     int held_note_index[10];
+    JudgementResult *judgement_result;
 } GameplayState;
 
 typedef struct {
@@ -31,11 +39,5 @@ typedef struct {
 typedef struct {
     KeyBinds binds[11];
 } Controls;
-
-typedef struct {
-    JudgementOutcome outcome;
-    float click_delay_ms;
-    float release_delay_ms;
-} JudgementResult;
 
 #endif

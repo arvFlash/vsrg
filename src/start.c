@@ -20,6 +20,11 @@ void StartMenu(GameState *state, Chart *chart, GameplayState *gp_state)
             gp_state->held_note_index[i] = -1;
         }
         gp_state->note_index = 0;
+        gp_state->judgement_result = malloc(sizeof(JudgementResult) * chart->note_count);
+        for(int i = 0; i < chart->note_count; i++) {
+            gp_state->judgement_result[i].outcome = JUDGEMENT_PENDING;
+        }
+
         chart->notes[0].time_ms = 500;
         chart->notes[0].end_time_ms = 0;
         chart->notes[0].lane = 0;

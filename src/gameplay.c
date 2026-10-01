@@ -17,7 +17,7 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
     float gap = 10.0f; // units of space between lanes
     float lane_width = size * 2 + gap;
     float total_width = lane_width * chart->lanes - gap;
-    float guide_thickness = 1.05; // guide circles line thickness
+    float guide_thickness = 1.07; // guide circles line thickness
     float hit_threshold = 300.0; // max timing error in ms
 
     ClearBackground(BLACK);
@@ -28,8 +28,8 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
 
     for(int i = 0; i < chart->lanes; i++) {
         float x = center_circ() - total_width * scale * 0.5f + (i * lane_width * scale) + (size * scale);
-        DrawCircle(x, (1080 - hit_pos) * scale, size * scale * guide_thickness, WHITE);
-        DrawCircle(x, (1080 - hit_pos) * scale, size * scale, BLACK);
+        DrawCircle(x, (1080 - hit_pos) * scale, size * scale, WHITE);
+        DrawCircle(x, (1080 - hit_pos) * scale, size * scale / guide_thickness, BLACK);
     }
 
     float time = GetMusicTimePlayed(chart->song) * 1000;
