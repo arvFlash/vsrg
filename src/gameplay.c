@@ -4,7 +4,7 @@
 #include "raylib.h"
 #include "scaling.h"
 #include <stdlib.h>
-#include <math.h>
+#include <stdio.h>
 
 
 
@@ -37,7 +37,16 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
     for(int i = 0; i < chart->lanes; i++) {
         if(gp_state->held_note_index[i] != -1) {
             if(!IsKeyDown(controls->binds[chart->lanes].lane_keys[i])) {
+                int delay = time - chart->notes[gp_state->held_note_index[i]].end_time_ms;
+                if(abs(delay) < hit_threshold) {
+                    gp_state->judgement_result[gp_state->held_note_index[i]].outcome = JUDGEMENT_HIT;
+                    gp_state->judgement_result[gp_state->held_note_index[i]].release_delay_ms = delay;
+                    printf("hold: %d\n", delay);
+                } else {
+                    gp_state->judgement_result[gp_state->held_note_index[i]].outcome = JUDGEMENT_DROPPED;
+                }
                 chart->notes[gp_state->held_note_index[i]].state = NOTE_DONE;
+                gp_state->held_note_index[i] = -1;
             }
         }
     }
@@ -51,13 +60,19 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
                 }
                 j++;
             }
-            if(fabsf(chart->notes[j].time_ms - time) < hit_threshold) {
+            int delay = time - chart->notes[j].time_ms;
+            if(abs(delay) < hit_threshold) {
                 if(chart->notes[j].end_time_ms > chart->notes[j].time_ms) {
-                    chart->notes[j].state = NOTE_HOLDING;
-                    gp_state->held_note_index[chart->notes[j].lane] = j;
+                    if(chart->notes[j].state != NOTE_DONE) {
+                        chart->notes[j].state = NOTE_HOLDING;
+                        gp_state->held_note_index[chart->notes[j].lane] = j;
+                    }
                 } else {
                     chart->notes[j].state = NOTE_DONE;
+                    gp_state->judgement_result[j].outcome = JUDGEMENT_HIT;
                 }      
+                gp_state->judgement_result[j].click_delay_ms = delay;
+                printf("hit: %d\n", delay);
             }
         }
     }
@@ -108,6 +123,7 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
     if(GetMusicTimePlayed(chart->song) >= GetMusicTimeLength(chart->song) - 0.1) {
         *state = STATE_MENU;
         free(chart->notes);
+        chart->notes = NULL;
         UnloadMusicStream(chart->song);
         return;
     }

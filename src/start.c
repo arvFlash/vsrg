@@ -7,6 +7,12 @@
 
 void StartMenu(GameState *state, Chart *chart, GameplayState *gp_state)
 {
+    return;
+}
+
+/*
+void StartMenu(GameState *state, Chart *chart, GameplayState *gp_state)
+{
     // float scale = GetScreenHeight() / 1080.0f;
     ClearBackground(WHITE);
     ShowCursor();
@@ -109,3 +115,4 @@ void StartMenu(GameState *state, Chart *chart, GameplayState *gp_state)
         return;
     }
 }
+*/

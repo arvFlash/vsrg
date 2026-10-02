@@ -3,7 +3,6 @@
 #include "gameplay.h"
 #include "scaling.h"
 #include "enums.h"
-#include <stdlib.h>
 
 
 int main(int argc, char *argv[])
@@ -46,7 +45,5 @@ int main(int argc, char *argv[])
     }
     CloseWindow();
     CloseAudioDevice();
-    free(chart.notes);
-    UnloadMusicStream(chart.song);
     return 0;
 }

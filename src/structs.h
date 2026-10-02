@@ -17,6 +17,7 @@ typedef struct {
     uint8_t lanes;    
     Music song;
     uint64_t note_count;
+    uint32_t offset_ms;
 } Chart;
 
 typedef struct {

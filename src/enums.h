@@ -18,7 +18,8 @@ typedef enum {
 typedef enum {
     JUDGEMENT_PENDING,
     JUDGEMENT_HIT,
-    JUDGEMENT_DROPPED
+    JUDGEMENT_DROPPED,
+    JUDGEMENT_MISSED
 } JudgementOutcome;
 
 #endif
