@@ -8,7 +8,7 @@
 
 
 
-void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls *controls)
+void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls *controls, Skin *skin)
 {
     float scale = GetScreenHeight() / 1080.0f;
     float size = 50.0f;
@@ -112,10 +112,10 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
             position = 1080 - hit_pos;
         }
 
-        DrawCircle(x, position * scale, size * scale, WHITE);
+        DrawCircle(x, position * scale, size * scale, skin->colors[chart->lanes].lane_colors[chart->notes[i].lane]);
         if(is_ln) {
-            DrawCircle(x, ln_position * scale, size * scale, WHITE);
-            DrawRectangle(x - size * scale, ln_position * scale, size * scale * 2, (position - ln_position) * scale, WHITE);
+            DrawCircle(x, ln_position * scale, size * scale, skin->colors[chart->lanes].lane_colors[chart->notes[i].lane]);
+            DrawRectangle(x - size * scale, ln_position * scale, size * scale * 2, (position - ln_position) * scale, skin->colors[chart->lanes].lane_colors[chart->notes[i].lane]);
         }
         i++;
     }

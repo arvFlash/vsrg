@@ -41,4 +41,12 @@ typedef struct {
     KeyBinds binds[11];
 } Controls;
 
+typedef struct {
+    Color lane_colors[10];
+} LaneColors;
+
+typedef struct {
+    LaneColors colors[11];
+} Skin;
+
 #endif
