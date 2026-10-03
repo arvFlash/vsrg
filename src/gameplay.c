@@ -21,6 +21,13 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
     float guide_thickness = 1.07; // guide circles line thickness
     float hit_threshold = 150.0; // max timing error in ms
 
+
+    if(gp_state->anchored_time != GetMusicTimePlayed(chart->song)) {
+        gp_state->anchored_time = GetMusicTimePlayed(chart->song);
+        gp_state->anchored_system_time = GetTime();
+    }
+    float time = (gp_state->anchored_time + (GetTime() - gp_state->anchored_system_time)) * 1000;
+    
     ClearBackground(BLACK);
 
     if(!IsMusicStreamPlaying(chart->song)) {
@@ -33,7 +40,6 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
         DrawCircle(x, (1080 - hit_pos) * scale, size * scale / guide_thickness, BLACK);
     }
 
-    float time = GetMusicTimePlayed(chart->song) * 1000;
 
     for(int i = 0; i < chart->lanes; i++) {
         if(gp_state->held_note_index[i] != -1) {

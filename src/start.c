@@ -22,6 +22,8 @@ void StartMenu(GameState *state, Chart *chart, GameplayState *gp_state)
         for(int i = 0; i < chart->lanes; i++) {
             gp_state->held_note_index[i] = -1;
         }
+        gp_state->anchored_time = GetMusicTimePlayed(chart->song);
+        gp_state->anchored_system_time = GetTime();
         *state = STATE_GAMEPLAY;
     }
 
