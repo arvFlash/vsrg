@@ -12,7 +12,7 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
 {
     float scale = GetScreenHeight() / 1080.0f;
     float size = 50.0f;
-    float speed = 1.0f;
+    float speed = 2.0f;
     float hit_pos = 100.0f; // units above screen border where note should be hit
     float gap = 10.0f; // units of space between lanes
     float lane_width = size * 2 + gap;
