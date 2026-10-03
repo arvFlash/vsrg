@@ -99,6 +99,10 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
 
         if(ln_position > 1080 + size) {
             gp_state->note_index++;
+            if(gp_state->judgement_result[i].outcome == JUDGEMENT_PENDING) {
+                gp_state->judgement_result[i].outcome = JUDGEMENT_MISSED;
+                printf("missed\n");
+            }
             i++;
             continue;
         }
