@@ -5,6 +5,7 @@
 #include "scaling.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 
 
@@ -18,7 +19,7 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
     float lane_width = size * 2 + gap;
     float total_width = lane_width * chart->lanes - gap;
     float guide_thickness = 1.07; // guide circles line thickness
-    float hit_threshold = 300.0; // max timing error in ms
+    float hit_threshold = 150.0; // max timing error in ms
 
     ClearBackground(BLACK);
 
@@ -44,6 +45,7 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
                     printf("hold: %d\n", delay);
                 } else {
                     gp_state->judgement_result[gp_state->held_note_index[i]].outcome = JUDGEMENT_DROPPED;
+                    printf("dropped\n");
                 }
                 chart->notes[gp_state->held_note_index[i]].state = NOTE_DONE;
                 gp_state->held_note_index[i] = -1;
@@ -56,7 +58,11 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
             int j = gp_state->note_index;
             while(j < chart->note_count) {
                 if(chart->notes[j].lane == i) {
-                    break;
+                    if(time - chart->notes[j].time_ms > hit_threshold) {
+                        gp_state->judgement_result[j].outcome = JUDGEMENT_MISSED;
+                    } else if(gp_state->judgement_result[j].outcome == JUDGEMENT_PENDING && fabs(chart->notes[j].time_ms - time) < hit_threshold) {
+                        break;
+                    }
                 }
                 j++;
             }
@@ -101,7 +107,7 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
             gp_state->note_index++;
             if(gp_state->judgement_result[i].outcome == JUDGEMENT_PENDING) {
                 gp_state->judgement_result[i].outcome = JUDGEMENT_MISSED;
-                printf("missed\n");
+                printf("miss\n");
             }
             i++;
             continue;
