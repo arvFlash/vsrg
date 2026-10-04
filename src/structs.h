@@ -35,6 +35,7 @@ typedef struct {
     JudgementResult *judgement_result;
     float anchored_time;
     float anchored_system_time;
+    int *judgement_vis;
 } GameplayState;
 
 typedef struct {

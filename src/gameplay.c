@@ -19,7 +19,8 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
     float lane_width = size * 2 + gap;
     float total_width = lane_width * chart->lanes - gap;
     float guide_thickness = 1.07; // guide circles line thickness
-    float hit_threshold = 150.0; // max timing error in ms
+    int hit_threshold = 150.0; // max timing error in ms
+    int bucket_size = 5;
 
 
     if(gp_state->anchored_time != GetMusicTimePlayed(chart->song)) {
@@ -48,6 +49,7 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
                 if(abs(delay) < hit_threshold) {
                     gp_state->judgement_result[gp_state->held_note_index[i]].outcome = JUDGEMENT_HIT;
                     gp_state->judgement_result[gp_state->held_note_index[i]].release_delay_ms = delay;
+                    gp_state->judgement_vis[(delay + hit_threshold) / bucket_size]++;
                     printf("hold: %d\n", delay);
                 } else {
                     gp_state->judgement_result[gp_state->held_note_index[i]].outcome = JUDGEMENT_DROPPED;
@@ -64,7 +66,7 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
             int j = gp_state->note_index;
             while(j < chart->note_count) {
                 if(chart->notes[j].lane == i) {
-                    if(time - chart->notes[j].time_ms > hit_threshold) {
+                    if(time - chart->notes[j].time_ms >= hit_threshold) {
                         gp_state->judgement_result[j].outcome = JUDGEMENT_MISSED;
                     } else if(gp_state->judgement_result[j].outcome == JUDGEMENT_PENDING && fabs(chart->notes[j].time_ms - time) < hit_threshold) {
                         break;
@@ -73,7 +75,7 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
                 j++;
             }
             int delay = time - chart->notes[j].time_ms;
-            if(abs(delay) < hit_threshold) {
+            if(abs(delay) <= hit_threshold) {
                 if(chart->notes[j].end_time_ms > chart->notes[j].time_ms) {
                     if(chart->notes[j].state != NOTE_DONE) {
                         chart->notes[j].state = NOTE_HOLDING;
@@ -85,6 +87,7 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
                 }      
                 gp_state->judgement_result[j].click_delay_ms = delay;
                 printf("hit: %d\n", delay);
+                gp_state->judgement_vis[(delay + hit_threshold) / bucket_size]++;
             }
         }
     }
@@ -134,6 +137,23 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
             DrawRectangle(x - size * scale, ln_position * scale, size * scale * 2, (position - ln_position) * scale, skin->colors[chart->lanes].lane_colors[chart->notes[i].lane]);
         }
         i++;
+    }
+    int max = 0;
+    for(int i = 0; i < (hit_threshold * 2 + 1) / bucket_size; i++) {
+        if(gp_state->judgement_vis[i] > max) {
+            max = gp_state->judgement_vis[i];
+        }
+    }
+
+    for(int i = 0; i < (hit_threshold * 2 + 1) / bucket_size; i++) {
+        if(gp_state->judgement_vis[i] > 0) {
+            float width = gp_state->judgement_vis[i] / (float)max * 200;
+            DrawRectangleRec((Rectangle){right(0, width * scale), (390 + i * bucket_size) * scale, width * scale, bucket_size * scale}, BLUE);
+        }
+        if(i - hit_threshold / bucket_size == 0) {
+            DrawRectangleRec((Rectangle){right(0, 50 * scale), (390 + i * bucket_size) * scale, 50 * scale, bucket_size * scale}, RED);
+        }
+        
     }
 
     if(GetMusicTimePlayed(chart->song) >= GetMusicTimeLength(chart->song) - 0.1) {
