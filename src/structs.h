@@ -6,6 +6,7 @@
 #include "enums.h"
 
 #define MAX_LANES 10
+#define MAX_BAR_HISTORY 500
 
 typedef struct {
     uint32_t time_ms;
@@ -28,6 +29,12 @@ typedef struct {
     float release_delay_ms;
 } JudgementResult;
 
+typedef struct {
+    int delays[MAX_BAR_HISTORY];
+    int index;
+    int count;
+    float times[MAX_BAR_HISTORY];
+} JudgementBar;
 
 typedef struct {
     uint32_t note_index;
@@ -35,7 +42,8 @@ typedef struct {
     JudgementResult *judgement_result;
     float anchored_time;
     float anchored_system_time;
-    int *judgement_vis;
+    int *judgement_histogram;
+    JudgementBar bar;
 } GameplayState;
 
 typedef struct {

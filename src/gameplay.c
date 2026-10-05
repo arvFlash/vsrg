@@ -20,7 +20,12 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
     float total_width = lane_width * chart->lanes - gap;
     float guide_thickness = 1.07; // guide circles line thickness
     int hit_threshold = 150.0; // max timing error in ms
-    int bucket_size = 5;
+    int bucket_size = 1;
+    int delay_bars = 100;
+    int bar_width = 500;
+    int bar_height = 20;
+    int bar_y = 700;
+    float bar_fade_time = 0.75;
 
 
     if(gp_state->anchored_time != GetMusicTimePlayed(chart->song)) {
@@ -49,7 +54,16 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
                 if(abs(delay) < hit_threshold) {
                     gp_state->judgement_result[gp_state->held_note_index[i]].outcome = JUDGEMENT_HIT;
                     gp_state->judgement_result[gp_state->held_note_index[i]].release_delay_ms = delay;
-                    gp_state->judgement_vis[(delay + hit_threshold) / bucket_size]++;
+                    gp_state->judgement_histogram[(delay + hit_threshold) / bucket_size]++;
+                    gp_state->bar.delays[gp_state->bar.index] = delay;
+                    gp_state->bar.times[gp_state->bar.index] = GetTime();
+                    gp_state->bar.index++;
+                    if(gp_state->bar.index == delay_bars) {
+                        gp_state->bar.index = 0;
+                    }
+                    if(gp_state->bar.count < delay_bars) {
+                        gp_state->bar.count++;
+                    }
                     printf("hold: %d\n", delay);
                 } else {
                     gp_state->judgement_result[gp_state->held_note_index[i]].outcome = JUDGEMENT_DROPPED;
@@ -85,9 +99,18 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
                     chart->notes[j].state = NOTE_DONE;
                     gp_state->judgement_result[j].outcome = JUDGEMENT_HIT;
                 }      
+                gp_state->bar.delays[gp_state->bar.index] = delay;
+                gp_state->bar.times[gp_state->bar.index] = GetTime();
+                gp_state->bar.index++;
+                if(gp_state->bar.index == delay_bars) {
+                    gp_state->bar.index = 0;
+                }
+                if(gp_state->bar.count < delay_bars) {
+                    gp_state->bar.count++;
+                }
                 gp_state->judgement_result[j].click_delay_ms = delay;
                 printf("hit: %d\n", delay);
-                gp_state->judgement_vis[(delay + hit_threshold) / bucket_size]++;
+                gp_state->judgement_histogram[(delay + hit_threshold) / bucket_size]++;
             }
         }
     }
@@ -140,14 +163,14 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
     }
     int max = 0;
     for(int i = 0; i < (hit_threshold * 2 + 1) / bucket_size; i++) {
-        if(gp_state->judgement_vis[i] > max) {
-            max = gp_state->judgement_vis[i];
+        if(gp_state->judgement_histogram[i] > max) {
+            max = gp_state->judgement_histogram[i];
         }
     }
 
     for(int i = 0; i < (hit_threshold * 2 + 1) / bucket_size; i++) {
-        if(gp_state->judgement_vis[i] > 0) {
-            float width = gp_state->judgement_vis[i] / (float)max * 200;
+        if(gp_state->judgement_histogram[i] > 0) {
+            float width = gp_state->judgement_histogram[i] / (float)max * 200;
             DrawRectangleRec((Rectangle){right(0, width * scale), (390 + i * bucket_size) * scale, width * scale, bucket_size * scale}, BLUE);
         }
         if(i - hit_threshold / bucket_size == 0) {
@@ -156,11 +179,24 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
         
     }
 
+    for(int i = 0; i < gp_state->bar.count; i++) {
+        float x = (float)gp_state->bar.delays[i] / hit_threshold * bar_width;
+        int alpha = 255 - (GetTime() - gp_state->bar.times[i]) * (255 / bar_fade_time); 
+        if(alpha < 0) {
+            alpha = 0;
+        }
+        Color color = (Color) {255, 255, 255, alpha};
+        DrawRectangleRec((Rectangle) {center_circ() + x * scale, bar_y * scale, 2 * scale, bar_height * scale}, color); 
+    }
+    DrawRectangleRec((Rectangle) {center_circ(), bar_y * scale, 2 * scale, bar_height * scale}, RED);
+
     if(GetMusicTimePlayed(chart->song) >= GetMusicTimeLength(chart->song) - 0.1) {
         *state = STATE_MENU;
         free(chart->notes);
         chart->notes = NULL;
         UnloadMusicStream(chart->song);
+        free(gp_state->judgement_histogram);
+        free(gp_state->judgement_result);
         return;
     }
     UpdateMusicStream(chart->song);
