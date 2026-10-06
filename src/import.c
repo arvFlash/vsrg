@@ -53,6 +53,7 @@ void import_from_osu(char *path, Chart *chart)
         }
         n++;
         chart->notes = realloc(chart->notes, sizeof(Note) * (n + 1));
+        printf("time: %d\n", time_ms);
     }
     chart->note_count = n;
     chart->notes = realloc(chart->notes, sizeof(Note) * n);

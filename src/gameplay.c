@@ -33,6 +33,7 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
         gp_state->anchored_system_time = GetTime();
     }
     float time = (gp_state->anchored_time + (GetTime() - gp_state->anchored_system_time)) * 1000;
+    time += -12;
     
     ClearBackground(BLACK);
 
@@ -82,14 +83,14 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
                 if(chart->notes[j].lane == i) {
                     if(time - chart->notes[j].time_ms >= hit_threshold) {
                         gp_state->judgement_result[j].outcome = JUDGEMENT_MISSED;
-                    } else if(gp_state->judgement_result[j].outcome == JUDGEMENT_PENDING && fabs(chart->notes[j].time_ms - time) < hit_threshold) {
+                    } else if(gp_state->judgement_result[j].outcome == JUDGEMENT_PENDING) {
                         break;
                     }
                 }
                 j++;
             }
             int delay = time - chart->notes[j].time_ms;
-            if(abs(delay) <= hit_threshold) {
+            if(abs(delay) <= hit_threshold && j < chart->note_count) {
                 if(chart->notes[j].end_time_ms > chart->notes[j].time_ms) {
                     if(chart->notes[j].state != NOTE_DONE) {
                         chart->notes[j].state = NOTE_HOLDING;
@@ -179,6 +180,7 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
         
     }
 
+    DrawRectangleRec((Rectangle) {center_circ(), bar_y * scale, 4 * scale, bar_height * scale}, RED);
     for(int i = 0; i < gp_state->bar.count; i++) {
         float x = (float)gp_state->bar.delays[i] / hit_threshold * bar_width;
         int alpha = 255 - (GetTime() - gp_state->bar.times[i]) * (255 / bar_fade_time); 
@@ -186,9 +188,8 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
             alpha = 0;
         }
         Color color = (Color) {255, 255, 255, alpha};
-        DrawRectangleRec((Rectangle) {center_circ() + x * scale, bar_y * scale, 2 * scale, bar_height * scale}, color); 
+        DrawRectangleRec((Rectangle) {center_circ() + x * scale, bar_y * scale, 4 * scale, bar_height * scale}, color); 
     }
-    DrawRectangleRec((Rectangle) {center_circ(), bar_y * scale, 2 * scale, bar_height * scale}, RED);
 
     if(GetMusicTimePlayed(chart->song) >= GetMusicTimeLength(chart->song) - 0.1) {
         *state = STATE_MENU;
