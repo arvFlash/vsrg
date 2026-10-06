@@ -47,6 +47,28 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
         DrawCircle(x, (1080 - hit_pos) * scale, size * scale / guide_thickness, BLACK);
     }
 
+    for(int i = gp_state->note_index; i < chart->note_count; i++) {
+        if(chart->notes[i].time_ms > chart->notes[i].end_time_ms) {
+            if(time - chart->notes[i].time_ms > hit_threshold) {
+                if(gp_state->judgement_result[i].outcome == JUDGEMENT_PENDING) {
+                    gp_state->judgement_result[i].outcome = JUDGEMENT_MISSED;
+                    printf("miss\n");
+                }
+                gp_state->note_index++;
+            } else {
+                break;
+            }
+        } else {
+            if(time - chart->notes[i].end_time_ms > hit_threshold && gp_state->judgement_result[i].outcome) {
+                if(gp_state->judgement_result[i].outcome == JUDGEMENT_PENDING) {
+                    gp_state->judgement_result[i].outcome = JUDGEMENT_MISSED;
+                    printf("miss\n");
+                }
+            } else {
+                break;
+            }
+        }
+    }
 
     for(int i = 0; i < chart->lanes; i++) {
         if(gp_state->held_note_index[i] != -1) {
@@ -80,13 +102,17 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
         if(IsKeyPressed(controls->binds[chart->lanes].lane_keys[i])) {
             int j = gp_state->note_index;
             while(j < chart->note_count) {
+                if(chart->notes[j].time_ms - time > hit_threshold) {
+                    break;   
+                }
                 if(chart->notes[j].lane == i) {
-                    if(time - chart->notes[j].time_ms >= hit_threshold) {
+                    if(time - chart->notes[j].time_ms > hit_threshold) {
                         gp_state->judgement_result[j].outcome = JUDGEMENT_MISSED;
                     } else if(gp_state->judgement_result[j].outcome == JUDGEMENT_PENDING) {
                         break;
                     }
                 }
+                printf("j: %d\n", j);
                 j++;
             }
             int delay = time - chart->notes[j].time_ms;
@@ -116,7 +142,7 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
         }
     }
 
-    int i = gp_state->note_index;
+    int i = gp_state->vis_note_index;
     while(true) {
         bool is_ln = chart->notes[i].end_time_ms > chart->notes[i].time_ms;
 
@@ -137,11 +163,7 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
         }
 
         if(ln_position > 1080 + size) {
-            gp_state->note_index++;
-            if(gp_state->judgement_result[i].outcome == JUDGEMENT_PENDING) {
-                gp_state->judgement_result[i].outcome = JUDGEMENT_MISSED;
-                printf("miss\n");
-            }
+            gp_state->vis_note_index++;
             i++;
             continue;
         }

@@ -37,6 +37,7 @@ typedef struct {
 } JudgementBar;
 
 typedef struct {
+    uint32_t vis_note_index;
     uint32_t note_index;
     int held_note_index[MAX_LANES];
     JudgementResult *judgement_result;

@@ -15,6 +15,7 @@ void StartMenu(GameState *state, Chart *chart, GameplayState *gp_state)
         import_from_osu("data/map/", chart);
 
         gp_state->note_index = 0;
+        gp_state->vis_note_index = 0;
         gp_state->judgement_result = malloc(sizeof(JudgementResult) * chart->note_count);
         for(int i = 0; i < chart->note_count; i++) {
             gp_state->judgement_result[i].outcome = JUDGEMENT_PENDING;
