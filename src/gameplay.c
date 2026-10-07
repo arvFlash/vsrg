@@ -33,7 +33,6 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
         gp_state->anchored_system_time = GetTime();
     }
     float time = (gp_state->anchored_time + (GetTime() - gp_state->anchored_system_time)) * 1000;
-    time += -12;
     
     ClearBackground(BLACK);
 
@@ -101,7 +100,8 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
     for(int i = 0; i < chart->lanes; i++) {
         if(IsKeyPressed(controls->binds[chart->lanes].lane_keys[i])) {
             int j = gp_state->note_index;
-            while(j < chart->note_count) {
+            for(j = gp_state->note_index; j < chart->note_count; j++) {
+                
                 if(chart->notes[j].time_ms - time > hit_threshold) {
                     break;   
                 }
@@ -112,11 +112,9 @@ void Gameplay(GameState *state, Chart *chart, GameplayState *gp_state, Controls 
                         break;
                     }
                 }
-                printf("j: %d\n", j);
-                j++;
             }
             int delay = time - chart->notes[j].time_ms;
-            if(abs(delay) <= hit_threshold && j < chart->note_count) {
+            if(abs(delay) <= hit_threshold) {
                 if(chart->notes[j].end_time_ms > chart->notes[j].time_ms) {
                     if(chart->notes[j].state != NOTE_DONE) {
                         chart->notes[j].state = NOTE_HOLDING;
